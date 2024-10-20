@@ -1,4 +1,4 @@
-from fastapi import FastAPI, File, UploadFile, Form
+from fastapi import FastAPI, File, UploadFile, Form, Depends, HTTPException
 from sqlalchemy.orm import Session
 from starlette.middleware.cors import CORSMiddleware
 from starlette.responses import FileResponse
@@ -65,4 +65,11 @@ async def upload_document(
     # Возвращаем обновленный документ
     return FileResponse(output_docx_path, media_type='application/vnd.openxmlformats-officedocument.wordprocessingml.document', filename=f"updated_{file.filename}")
 
+
+@app.get("/documents")
+def read_documents(db: Session = Depends(get_db)):
+    documents = db.query(Document).all()
+    if not documents:
+        raise HTTPException(status_code=404, detail="No documents found")
+    return documents
 
