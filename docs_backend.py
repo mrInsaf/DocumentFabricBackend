@@ -9,7 +9,6 @@ from misc import add_qr_to_docx
 app = FastAPI()
 # Настройка CORS
 origins = [
-    "*"
 ]
 
 app.add_middleware(
