@@ -9,6 +9,7 @@ from misc import add_qr_to_docx
 app = FastAPI()
 # Настройка CORS
 origins = [
+    "*"
 ]
 
 app.add_middleware(
@@ -34,36 +35,52 @@ def get_db():
 
 @app.post("/upload/")
 async def upload_document(
-        title: str = Form(...),
-        description: str = Form(...),
-        file: UploadFile = File(...)
+    personCode: str = Form(...),
+    kksCode: str = Form(...),
+    workType: str = Form(...),
+    docType: str = Form(...),
+    versionPrefix: str = Form(...),
+    version: str = Form(...),
+    datelnput: str = Form(...),
+    document: UploadFile = File(...)
 ):
     db: Session = next(get_db())
 
     # Создание нового документа
-    new_document = Document(title=title, description=description)
+    new_document = Document(
+        person_code=personCode,
+        kks_code=kksCode,
+        work_type=workType,
+        doc_type=docType,
+        version_prefix=versionPrefix,
+        version=version,
+        date_input=datelnput,
+    )
 
     # Сохранение в базу данных
     db.add(new_document)
     db.commit()
     db.refresh(new_document)
 
-    # Сохранение файла (если необходимо)
-    input_docx_path = f"./uploads/{file.filename}"
+    # Сохранение файла
+    input_docx_path = f"./uploads/{document.filename}"
     with open(input_docx_path, "wb") as f:
-        content = await file.read()
+        content = await document.read()
         f.write(content)
 
-    # Генерация QR-кода из названия и описания
-    qr_data = f"Title: {title}\nDescription: {description}"
-    output_docx_path = f"./uploads/updated_{file.filename}"
+    # Генерация QR-кода из данных
+    qr_data = f"Person: {personCode}\nKKS: {kksCode}\nWorkType: {workType}\nVersion: {version}"
+    output_docx_path = f"./uploads/updated_{document.filename}"
 
     # Добавление QR-кода в документ
     add_qr_to_docx(input_docx_path, qr_data, output_docx_path)
 
     # Возвращаем обновленный документ
-    return FileResponse(output_docx_path, media_type='application/vnd.openxmlformats-officedocument.wordprocessingml.document', filename=f"updated_{file.filename}")
-
+    return FileResponse(
+        output_docx_path,
+        media_type='application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        filename=f"updated_{document.filename}",
+    )
 
 @app.get("/documents")
 def read_documents(db: Session = Depends(get_db)):
