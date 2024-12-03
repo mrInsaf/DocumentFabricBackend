@@ -9,8 +9,6 @@ from misc import add_qr_to_docx
 app = FastAPI()
 # Настройка CORS
 origins = [
-    # "http://localhost:3000",  # разрешите доступ с вашего фронтенд приложения
-    # "https://mr-morkow.ru:9999",  # добавьте URL вашего фронтенда
     "*"
 ]
 
