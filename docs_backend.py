@@ -11,6 +11,7 @@ app = FastAPI()
 origins = [
     "http://localhost:3000",  # разрешите доступ с вашего фронтенд приложения
     "https://mr-morkow.ru:9999",  # добавьте URL вашего фронтенда
+    "*"
 ]
 
 app.add_middleware(
